@@ -13,6 +13,7 @@ import json
 from datetime import datetime
 from typing import Dict, Optional, Tuple
 from pathlib import Path
+from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
 from flask import Flask, jsonify, request, send_from_directory, abort
 
@@ -32,6 +33,7 @@ GUILD_ID = extract_id(os.environ.get("GUILD_ID", "0"))
 VERIFIED_ROLE_ID = extract_id(os.environ.get("VERIFIED_ROLE_ID", "0"))
 LOG_CHANNEL_ID = extract_id(os.environ.get("LOG_CHANNEL_ID", "0"))
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK", "")
+VERIFICATION_URL = os.environ.get("VERIFICATION_URL", "").strip()
 
 verification_tokens = {}
 
@@ -55,6 +57,32 @@ app = Flask(__name__, static_folder=None)
 app.config['JSON_SORT_KEYS'] = False
 
 _bot_thread: Optional[threading.Thread] = None
+
+
+def build_verification_link(token: str) -> Optional[str]:
+    """Construye la URL de verificación con el token como query param."""
+    if not VERIFICATION_URL:
+        return None
+
+    try:
+        parsed = urlparse(VERIFICATION_URL)
+        query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        query['token'] = token
+        rebuilt = parsed._replace(query=urlencode(query))
+        return urlunparse(rebuilt)
+    except Exception:
+        separator = '&' if '?' in VERIFICATION_URL else '?'
+        return f"{VERIFICATION_URL}{separator}token={token}"
+
+
+def create_verification_view(link: Optional[str]) -> Optional[discord.ui.View]:
+    """Crea el botón de verificación si hay link configurado."""
+    if not link:
+        return None
+
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(label="Verificar", style=discord.ButtonStyle.link, url=link, emoji="✅"))
+    return view
 
 
 def get_client_ip() -> str:
@@ -154,18 +182,28 @@ async def on_member_join(member):
             'username': str(member),
             'joined_at': datetime.now().isoformat()
         }
+
+        verification_link = build_verification_link(verification_token)
+        view = create_verification_view(verification_link)
         
         embed = discord.Embed(
             title="🔐 Verificación Requerida",
             description=f"¡Bienvenido/a a **{member.guild.name}**!\n\nPara acceder al servidor, necesitas verificarte usando el token que se te proporcionará.",
             color=0x00FF00
         )
-        embed.add_field(name="📋 Instrucciones", value="1. Usa el token de verificación en tu interfaz personalizada\n2. Serás verificado automáticamente", inline=False)
+        instrucciones = [
+            "Presiona el botón **Verificar** para abrir la página oficial",
+            "La página detectará tu token y procesará la verificación",
+            "Si no se abre el enlace, copia el token manualmente"
+        ]
+        embed.add_field(name="📋 Instrucciones", value="\n".join(f"{idx}. {texto}" for idx, texto in enumerate(instrucciones, start=1)), inline=False)
         embed.add_field(name="🔑 Token de Verificación", value=f"`{verification_token}`", inline=False)
+        if verification_link:
+            embed.add_field(name="🌐 Acceso rápido", value=f"[Haz clic aquí para verificarte]({verification_link})", inline=False)
         embed.set_footer(text="Este token es único y solo funciona una vez")
         
         try:
-            await member.send(embed=embed)
+            await member.send(embed=embed, view=view)
             print(f'✅ Mensaje de verificación enviado a {member.name}', flush=True)
         except discord.Forbidden:
             print(f'❌ No se pudo enviar MD a {member.name} (DMs cerrados)', flush=True)
@@ -173,7 +211,14 @@ async def on_member_join(member):
             for channel in member.guild.text_channels:
                 if channel.permissions_for(member.guild.me).send_messages:
                     try:
-                        await channel.send(f'{member.mention} revisa tus mensajes directos para obtener tu token de verificación.', embed=embed, delete_after=60)
+                        fallback_embed = embed.copy()
+                        fallback_view = create_verification_view(verification_link)
+                        await channel.send(
+                            f'{member.mention} revisa este mensaje para completar tu verificación.',
+                            embed=fallback_embed,
+                            view=fallback_view,
+                            delete_after=60
+                        )
                         break
                     except:
                         continue

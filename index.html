@@ -43,7 +43,7 @@
                     </span>
                 </h1>
                 <p class="chrome-subtitle text-xs uppercase tracking-[0.5rem] text-slate-200/70 sm:text-sm">
-                    Estado pendiente
+                  ࿇  Estado pendiente ࿇
                 </p>
                 <!-- Punto de integración con el bot: maneja el evento de este botón para lanzar la lógica conversacional -->
                 <button
@@ -56,7 +56,7 @@
                 <span class="text-[0.65rem] text-slate-100/55">Creators</span>
                 <div class="mt-4 flex flex-wrap items-center justify-center gap-6 text-[0.68rem] text-slate-100/80">
                     <span>ALMIRI</span>
-                    <span>cookingwithLAJA</span>
+                    <span>𝕮𝖔𝖔𝖐𝖎𝖓𝖌𝖜𝖎𝖙𝖍𝖑𝖆𝖏𝖆</span>
                     <span>bighomie</span>
                 </div>
             </div>
@@ -111,6 +111,24 @@
                 const defaultSubtitle = statusText.textContent;
                 verifyBtn.dataset.state = 'idle';
 
+                const params = new URLSearchParams(window.location.search);
+                const tokenFromUrl = params.get('token');
+
+                if (tokenFromUrl) {
+                    const sanitizedToken = tokenFromUrl.trim();
+                    if (sanitizedToken) {
+                        verifyBtn.dataset.token = sanitizedToken;
+                        statusText.textContent = 'Procesando token recibido...';
+                        verifyBtn.textContent = 'Verificando token...';
+
+                        setTimeout(() => {
+                            if (verifyBtn.dataset.state === 'idle') {
+                                verifyBtn.click();
+                            }
+                        }, 500);
+                    }
+                }
+
                 verifyBtn.addEventListener('click', async () => {
                     if (verifyBtn.dataset.state === 'loading' || verifyBtn.dataset.state === 'done') {
                         return;
@@ -163,6 +181,17 @@
 
                             verifyBtn.textContent = 'Verificado';
                             verifyBtn.dataset.state = 'done';
+                            verifyBtn.dataset.token = '';
+
+                            try {
+                                const cleanUrl = new URL(window.location.href);
+                                if (cleanUrl.searchParams.has('token')) {
+                                    cleanUrl.searchParams.delete('token');
+                                    window.history.replaceState({}, document.title, cleanUrl.toString());
+                                }
+                            } catch (historyError) {
+                                console.warn('No se pudo limpiar el token de la URL.', historyError);
+                            }
                         } else {
                             statusText.textContent = message;
                             gsap.fromTo(statusText, { color: '#f87171' }, { color: '', duration: 0.6, ease: 'power2.out' });
