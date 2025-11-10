@@ -80,7 +80,7 @@ def create_verification_view(link: Optional[str]) -> Optional[discord.ui.View]:
     if not link:
         return None
 
-    view = discord.ui.View()
+    view = discord.ui.View(timeout=None)
     view.add_item(discord.ui.Button(label="Verificar", style=discord.ButtonStyle.link, url=link, emoji="✅"))
     return view
 
@@ -184,6 +184,8 @@ async def on_member_join(member):
         }
 
         verification_link = build_verification_link(verification_token)
+        if not verification_link:
+            print('⚠️ VERIFICATION_URL no configurado o inválido. No se enviará botón/link en el mensaje.', flush=True)
         view = create_verification_view(verification_link)
         
         embed = discord.Embed(
@@ -200,6 +202,8 @@ async def on_member_join(member):
         embed.add_field(name="🔑 Token de Verificación", value=f"`{verification_token}`", inline=False)
         if verification_link:
             embed.add_field(name="🌐 Acceso rápido", value=f"[Haz clic aquí para verificarte]({verification_link})", inline=False)
+        else:
+            embed.add_field(name="🌐 Acceso rápido", value="Configura la variable `VERIFICATION_URL` para habilitar el botón automático.", inline=False)
         embed.set_footer(text="Este token es único y solo funciona una vez")
         
         try:
@@ -687,6 +691,10 @@ if __name__ == '__main__':
     print(f"Guild ID: {GUILD_ID}", flush=True)
     print(f"Verified Role ID: {VERIFIED_ROLE_ID}", flush=True)
     print(f"Log Channel ID: {LOG_CHANNEL_ID}", flush=True)
+    if VERIFICATION_URL:
+        print(f"Verification URL base: {VERIFICATION_URL}", flush=True)
+    else:
+        print("⚠️ VERIFICATION_URL no configurado. Los mensajes no incluirán botón/link.", flush=True)
     
     if not BOT_TOKEN:
         print("⚠️ BOT_TOKEN no configurado. El bot de Discord no se iniciará.", flush=True)
