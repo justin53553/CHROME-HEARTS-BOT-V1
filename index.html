@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome Hearts | Bot Ready Landing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;900&family=Poppins:wght@400;600&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['"Montserrat"', 'sans-serif'],
+                        poppins: ['"Poppins"', 'sans-serif']
+                    },
+                    colors: {
+                        'chrome-surface': '#121317'
+                    },
+                    boxShadow: {
+                        chrome: '0 48px 90px rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="relative min-h-screen bg-[#050505] font-montserrat text-slate-100 overflow-hidden">
+    <div class="pointer-events-none absolute inset-0 -z-30 bg-[linear-gradient(135deg,rgba(0,0,0,0.72),rgba(255,255,255,0.12)),url('img/enhanced_chrome-hearts-club-be0b195uxic2r0b4.png')] bg-cover bg-center bg-no-repeat blur-[6px] brightness-[0.55] scale-[1.08]"></div>
+    <div class="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(120%_120%_at_18%_12%,rgba(255,255,255,0.1),transparent_65%),radial-gradient(120%_120%_at_82%_88%,rgba(133,112,255,0.14),transparent_60%),linear-gradient(160deg,rgba(0,0,0,0.66),rgba(0,0,0,0.22))]"></div>
+
+    <div class="floating-icons"></div>
+
+    <main class="relative z-10 flex w-full min-h-screen flex-col items-center justify-center px-6 py-12 lg:py-16">
+        <section class="hero-stack flex w-full max-w-5xl flex-1 flex-col items-center text-center">
+            <div class="flex flex-1 flex-col items-center justify-center gap-6">
+                <h1 class="leading-[0.95]">
+                    <span class="chrome-text block text-[clamp(3.2rem,11vw,5.2rem)] tracking-[clamp(0.4rem,1.2vw,1rem)]">
+                        CHROME HEARTS
+                    </span>
+                </h1>
+                <p class="chrome-subtitle text-xs uppercase tracking-[0.5rem] text-slate-200/70 sm:text-sm">
+                    Estado pendiente
+                </p>
+                <!-- Punto de integración con el bot: maneja el evento de este botón para lanzar la lógica conversacional -->
+                <button
+                    id="verifyButton"
+                    class="mt-8 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-[0.75rem] font-semibold uppercase tracking-[0.35rem] text-slate-100/85 transition duration-200 hover:border-white/35 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40">
+                    Activar verificación
+                </button>
+            </div>
+            <div class="mt-auto w-full pb-6 text-center uppercase tracking-[0.35rem] text-slate-100/70">
+                <span class="text-[0.65rem] text-slate-100/55">Creators</span>
+                <div class="mt-4 flex flex-wrap items-center justify-center gap-6 text-[0.68rem] text-slate-100/80">
+                    <span>ALMIRI</span>
+                    <span>cookingwithLAJA</span>
+                    <span>bighomie</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" referrerpolicy="no-referrer"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.from('.hero-stack', { opacity: 0, y: 32, duration: 1.1, ease: 'power3.out' });
+            gsap.from('.chrome-subtitle', { opacity: 0, y: 14, duration: 0.9, ease: 'power2.out', delay: 0.35 });
+
+            const iconLayer = document.querySelector('.floating-icons');
+            const statusText = document.querySelector('.chrome-subtitle');
+            const verifyBtn = document.getElementById('verifyButton');
+
+            const spawnSymbol = () => {
+                if (!iconLayer) {
+                    return;
+                }
+
+                const symbol = document.createElement('span');
+                symbol.textContent = '♱';
+
+                const left = Math.random() * 100;
+                const duration = 12 + Math.random() * 10;
+                const size = 1.6 + Math.random() * 2.2;
+                const opacity = 0.35 + Math.random() * 0.45;
+
+                symbol.style.left = `${left}%`;
+                symbol.style.fontSize = `${size}rem`;
+                symbol.style.animationDuration = `${duration}s`;
+                symbol.style.color = `rgba(255, 255, 255, ${opacity})`;
+
+                iconLayer.appendChild(symbol);
+
+                symbol.addEventListener('animationend', () => {
+                    symbol.remove();
+                });
+
+                const nextSpawn = 1100 + Math.random() * 1300;
+                setTimeout(spawnSymbol, nextSpawn);
+            };
+
+            // Lanza varios símbolos iniciales para llenar la escena más rápido
+            const initialBursts = 3;
+            for (let i = 0; i < initialBursts; i += 1) {
+                setTimeout(spawnSymbol, i * 520);
+            }
+
+            if (verifyBtn && statusText) {
+                const defaultSubtitle = statusText.textContent;
+                verifyBtn.dataset.state = 'idle';
+
+                verifyBtn.addEventListener('click', async () => {
+                    if (verifyBtn.dataset.state === 'loading' || verifyBtn.dataset.state === 'done') {
+                        return;
+                    }
+
+                    let token = verifyBtn.dataset.token || '';
+                    if (!token) {
+                        token = window.prompt('Introduce tu token de verificación proporcionado por el bot:');
+                    }
+
+                    if (!token) {
+                        gsap.fromTo(
+                            statusText,
+                            { opacity: 0.45 },
+                            { opacity: 1, duration: 0.3, ease: 'power1.inOut' }
+                        );
+                        return;
+                    }
+
+                    verifyBtn.dataset.state = 'loading';
+                    verifyBtn.classList.add('pointer-events-none', 'opacity-70');
+                    verifyBtn.textContent = 'Verificando...';
+
+                    try {
+                        const response = await fetch('/verificar', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token: token.trim() })
+                        });
+
+                        const payload = await response.json().catch(() => ({ success: false, message: 'Error parseando la respuesta' }));
+                        const message = payload.message || (payload.success ? 'Verificado ✅' : 'No se pudo verificar');
+
+                        if (response.ok && payload.success) {
+                            gsap.timeline()
+                                .to(statusText, { duration: 0.25, opacity: 0, y: -8, ease: 'power2.in' })
+                                .add(() => {
+                                    statusText.textContent = message;
+                                })
+                                .to(statusText, { duration: 0.45, opacity: 1, y: 0, scale: 1.05, ease: 'power2.out' })
+                                .to(statusText, { duration: 0.25, scale: 1, ease: 'power1.out' });
+
+                            gsap.to(verifyBtn, {
+                                duration: 0.45,
+                                scale: 0.94,
+                                ease: 'power2.out',
+                                yoyo: true,
+                                repeat: 1
+                            });
+
+                            verifyBtn.textContent = 'Verificado';
+                            verifyBtn.dataset.state = 'done';
+                        } else {
+                            statusText.textContent = message;
+                            gsap.fromTo(statusText, { color: '#f87171' }, { color: '', duration: 0.6, ease: 'power2.out' });
+                            verifyBtn.dataset.state = 'idle';
+                            verifyBtn.textContent = 'Reintentar verificación';
+                            verifyBtn.classList.remove('pointer-events-none', 'opacity-70');
+
+                            setTimeout(() => {
+                                if (verifyBtn.dataset.state !== 'done') {
+                                    statusText.textContent = defaultSubtitle;
+                                }
+                            }, 3500);
+                        }
+                    } catch (error) {
+                        console.error('Error verificando:', error);
+                        statusText.textContent = 'Error de conexión. Intenta otra vez.';
+                        gsap.fromTo(statusText, { color: '#f87171' }, { color: '', duration: 0.6, ease: 'power2.out' });
+                        verifyBtn.dataset.state = 'idle';
+                        verifyBtn.textContent = 'Reintentar verificación';
+                        verifyBtn.classList.remove('pointer-events-none', 'opacity-70');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

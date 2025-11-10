@@ -1,0 +1,74 @@
+body {
+    font-family: "Montserrat", "Poppins", "Segoe UI", sans-serif;
+    background-color: #050505;
+    color: #f5f5f5;
+    -webkit-font-smoothing: antialiased;
+}
+
+.hero-stack {
+    max-width: 64rem;
+    min-height: 80vh;
+}
+
+.chrome-text {
+    --shine-pos: 55%;
+    --glint-x: 0%;
+    position: relative;
+    display: inline-block;
+    padding-inline: 0.2em;
+    color: transparent;
+    background-image: linear-gradient(110deg, #62666c 0%, #cfd2d8 28%, #ffffff 48%, #d4d7dc 62%, #7f838a 100%);
+    background-size: 200% 100%;
+    background-position: var(--shine-pos) 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 22px rgba(255, 255, 255, 0.28));
+}
+
+.chrome-text::after {
+    content: '';
+    position: absolute;
+    inset: -22% -30%;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.18) 35%, transparent 65%);
+    mix-blend-mode: screen;
+    opacity: 0.65;
+    transform: translateX(var(--glint-x)) skewX(-14deg);
+    pointer-events: none;
+}
+
+.floating-icons {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.floating-icons span {
+    position: absolute;
+    bottom: -15vh;
+    font-size: clamp(1.8rem, 3vw, 3.6rem);
+    color: rgba(255, 255, 255, 0.65);
+    text-shadow: 0 10px 22px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transform: translate(-50%, 0) scale(1);
+    animation: riseSymbol linear forwards;
+}
+
+@keyframes riseSymbol {
+    0% {
+        transform: translate(-50%, 0) scale(0.9);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.65;
+    }
+    80% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -140vh) scale(1.15);
+        opacity: 0;
+    }
+}
+
