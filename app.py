@@ -594,16 +594,16 @@ def start_bot_thread():
         app.logger.warning('BOT_TOKEN no configurado; el bot no se iniciará.')
         return
 
-        if _bot_thread is None or not _bot_thread.is_alive():
-            app.logger.info('Lanzando hilo del bot de Discord...')
-            _bot_thread = threading.Thread(target=run_bot, name='discord-bot-thread', daemon=True)
-            _bot_thread.start()
+    if _bot_thread is None or not _bot_thread.is_alive():
+        app.logger.info('Lanzando hilo del bot de Discord...')
+        _bot_thread = threading.Thread(target=run_bot, name='discord-bot-thread', daemon=True)
+        _bot_thread.start()
 
 
-    if hasattr(app, 'before_serving'):
-        @app.before_serving
-        def _start_bot_on_before_serving():
-            start_bot_thread()
+if hasattr(app, 'before_serving'):
+    @app.before_serving
+    def _start_bot_on_before_serving():
+        start_bot_thread()
 
 
 def run_flask():
@@ -649,4 +649,4 @@ if __name__ == '__main__':
     else:
         start_bot_thread()
 
-    run_flask()
+    run_flask() 
